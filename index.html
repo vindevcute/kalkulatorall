@@ -360,7 +360,7 @@
 
             <p>Poin Anda: <span id="poin">100</span></p>
 
-            <p>IQ Anda: <span id="iq">100</span></p>
+            <p>IQ Anda: <span id="iq">0</span></p>
 
             <button onclick="beliIQ(10)">Beli 10 IQ (100 Poin)</button>
 
@@ -585,6 +585,69 @@
             return `${pembilang}/${penyebut}`;
 
         }
+
+
+        function hitungAljabar() {
+    let ekspresi = document.getElementById("input").value;
+    try {
+        // Ganti variabel dengan nilai 1 untuk evaluasi sederhana
+        ekspresi = ekspresi.replace(/[a-zA-Z]/g, '1');
+        let hasil = eval(ekspresi);
+        document.getElementById("hasil").innerText = "Hasil: " + hasil;
+        tambahPoin(10); // Tambah poin setelah menghitung
+        tampilkanIklan();
+    } catch (e) {
+        document.getElementById("hasil").innerText = "Error: Ekspresi tidak valid.";
+    }
+        }
+
+
+        function hitungLinearSatuVariabel() {
+    let ekspresi = document.getElementById("input").value;
+    try {
+        let [kiri, kanan] = ekspresi.split("=").map(s => s.trim());
+        let koefisienX = eval(kiri.replace(/x/g, '1') - eval(kiri.replace(/x/g, '0'));
+        let konstanta = eval(kanan) - eval(kiri.replace(/x/g, '0'));
+        let x = konstanta / koefisienX;
+        document.getElementById("hasil").innerText = "Nilai x: " + x;
+        tambahPoin(10); // Tambah poin setelah menghitung
+        tampilkanIklan();
+    } catch (e) {
+        document.getElementById("hasil").innerText = "Error: Persamaan tidak valid.";
+    }
+            }
+
+
+        function hitungLinearDuaVariabel() {
+    let ekspresi = document.getElementById("input").value;
+    try {
+        let persamaan = ekspresi.split(",").map(s => s.trim());
+        if (persamaan.length !== 2) throw new Error("Masukkan dua persamaan.");
+
+        // Ekstrak koefisien dan konstanta
+        let [a1, b1, c1] = ekstrakKoefisien(persamaan[0]);
+        let [a2, b2, c2] = ekstrakKoefisien(persamaan[1]);
+
+        // Eliminasi untuk mencari y
+        let y = (c1 * a2 - c2 * a1) / (b1 * a2 - b2 * a1);
+        // Substitusi untuk mencari x
+        let x = (c1 - b1 * y) / a1;
+
+        document.getElementById("hasil").innerText = `Nilai x: ${x}, Nilai y: ${y}`;
+        tambahPoin(10); // Tambah poin setelah menghitung
+        tampilkanIklan();
+    } catch (e) {
+        document.getElementById("hasil").innerText = "Error: " + e.message;
+    }
+}
+
+function ekstrakKoefisien(persamaan) {
+    let parts = persamaan.split(/[+=]/).map(s => s.trim());
+    let a = parseFloat(parts[0].replace(/x/g, '')) || 0;
+    let b = parseFloat(parts[1].replace(/y/g, '')) || 0;
+    let c = parseFloat(parts[2]) || 0;
+    return [a, b, c];
+                       }
 
 
 
