@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KalkulatorBYVin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            display: inline-block;
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            width: 200px;
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #hasil {
+            font-size: 20px;
+            margin-top: 10px;
+            color: #007bff;
+        }
+        .menu {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .menu button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #007bff;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            right: 10px;
+            top: 30px;
+            width: 150px;
+            text-align: left;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .dropdown a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #333;
+            transition: background-color 0.3s;
+        }
+        .dropdown a:hover {
+            background: #f1f1f1;
+        }
+        .store {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .ad {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .login-form {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .loading {
+            display: none;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #007bff;
+        }
+        /* Tambahan CSS untuk logo email */
+        .email-logo {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: #007bff;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .email-logo:hover {
+            color: #0056b3;
+        }
+    </style>
+    <!-- Tesseract.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
+    <!-- Font Awesome untuk ikon email -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <!-- Logo Email di pojok kiri bawah -->
+    <a href="mailto:vinhaidigital@gmail.com" class="email-logo">
+        <i class="fas fa-envelope"></i> <!-- Ikon email dari Font Awesome -->
+    </a>
+
+    <div class="menu">
+        <button onclick="toggleMenu()">|||</button>
+        <div id="dropdown" class="dropdown">
+            <a href="#" onclick="tampilkanChangeLog()">📝 ChangeLog</a>
+            <a href="#" onclick="tampilkanTutorial()">📘 Tutorial</a>
+            <a href="#" onclick="alert('✏️ KalkulatorBYVin v1.5Beta\nDibuat oleh Vin Dengan Sistem Operasional HtmlSite\nCoding Html,Css')">❗ Info</a>
+            <a href="#" onclick="tampilkanContactDev()">📞 Contact Dev</a>
+            <a href="#" onclick="tampilkanMenuVolume()">📏 Hitung Volume</a>
+            <a href="#" onclick="tampilkanMenuGeometri()">📐 Geometri</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>KalkulatorBYVin</h2>
+        <p>Masukkan ekspresi (misalnya: 1/2 + 3/4 atau 2 + 5/6,2 + 2)</p>
+        <p>Untuk persamaan linear dua variabel, masukkan dalam format: 2x + 3y = 5, 4x + 6y = 10</p>
+        <p>Untuk persamaan linear satu variabel, masukkan dalam format: 2x + 3 = 5</p>
+        
+        <input type="text" id="input" placeholder="Masukkan angka atau pecahan">
+        
+        <div>
+            <button onclick="hitungBiasa('+')">+</button>
+            <button onclick="hitungBiasa('-')">-</button>
+            <button onclick="hitungBiasa('*')">×</button>
+            <button onclick="hitungBiasa('/')">÷</button>
+        </div>
+        
+        <div>
+            <button onclick="hitungPecahan('+')">+ Pecahan</button>
+            <button onclick="hitungPecahan('-')">- Pecahan</button>
+            <button onclick="hitungPecahan('*')">× Pecahan</button>
+            <button onclick="hitungPecahan('/')">÷ Pecahan</button>
+        </div>
+
+        <div>
+            <button onclick="hitungAljabar()">Hitung Aljabar</button>
+            <button onclick="hitungLinearSatuVariabel()">Hitung Linear 1 Variabel</button>
+            <button onclick="hitungLinearDuaVariabel()">Hitung Linear 2 Variabel</button>
+        </div>
+
+        <p id="hasil"></p>
+
+        <div class="store">
+            <h3>Store</h3>
+            <p>Poin Anda: <span id="poin">100</span></p>
+            <p>IQ Anda: <span id="iq">100</span></p>
+            <button onclick="beliIQ(10)">Beli 10 IQ (100 Poin)</button>
+            <button onclick="beliIQ(20)">Beli 20 IQ (200 Poin)</button>
+        </div>
+
+        <div>
+            <h3>Unggah Soal dari Foto</h3>
+            <input type="file" id="fileInput" accept="image/*">
+            <button onclick="prosesSoalDariFoto()">Proses Soal</button>
+        </div>
+
+        <div class="loading" id="loading">
+            Sedang memproses gambar...
+        </div>
+
+        <div class="ad" id="ad">
+            <!-- Tempat untuk iklan -->
+            <p>Thank you for using the services here</p>
+        </div>
+
+        <div class="login-form">
+            <h3>Buat Akun / Login</h3>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="buatAkun()">Buat Akun</button>
+            <button onclick="login()">Login</button>
+        </div>
+    </div>
+
+    <script>
+        let poin = localStorage.getItem('poin') ? parseInt(localStorage.getItem('poin')) : 100;
+        let iq = localStorage.getItem('iq') ? parseInt(localStorage.getItem('iq')) : 100;
+        let users = JSON.parse(localStorage.getItem('users')) || {};
+        let lastLogin = localStorage.getItem('lastLogin') || "";
+        let loginStreak = localStorage.getItem('loginStreak') ? parseInt(localStorage.getItem('loginStreak')) : 0;
+        let startTime = Date.now(); // Waktu mulai penggunaan aplikasi
+
+        document.getElementById('poin').innerText = poin;
+        document.getElementById('iq').innerText = iq;
+
+        function toggleMenu() {
+            let menu = document.getElementById("dropdown");
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+
+        function hitungBiasa(operator) {
+            let ekspresi = document.getElementById("input").value;
+            try {
+                let angka = ekspresi.split(operator).map(Number);
+                if (angka.length < 2) throw new Error("Masukkan ekspresi yang valid");
+
+                let hasil;
+                switch (operator) {
+                    case "+": hasil = angka[0] + angka[1]; break;
+                    case "-": hasil = angka[0] - angka[1]; break;
+                    case "*": hasil = angka[0] * angka[1]; break;
+                    case "/": hasil = angka[0] / angka[1]; break;
+                }
+
+                document.getElementById("hasil").innerText = "Hasil: " + hasil;
+                tambahPoin(10); // Tambah poin setelah menghitung
+                tampilkanIklan();
+            } catch (e) {
+                document.getElementById("hasil").innerText = "Error: " + e.message;
+            }
+        }
+
+        function hitungPecahan(operator) {
+            let ekspresi = document.getElementById("input").value;
+            try {
+                ekspresi = ekspresi.replace(/\s+/g, '');
+                let pecahanRegex = /(\d+\/\d+|\d+)/g;
+                let angka = ekspresi.match(pecahanRegex) || [];
+
+                if (angka.length < 2) throw new Error("Masukkan ekspresi yang valid");
+
+                let hasil = ubahKeDesimal(angka[0]);
+
+                for (let i = 1; i < angka.length; i++) {
+                    let nilai = ubahKeDesimal(angka[i]);
+                    switch (operator) {
+                        case "+": hasil += nilai; break;
+                        case "-": hasil -= nilai; break;
+                        case "*": hasil *= nilai; break;
+                        case "/": hasil /= nilai; break;
+                    }
+                }
+
+                document.getElementById("hasil").innerText = "Hasil: " + ubahKePecahan(hasil);
+                tambahPoin(10); // Tambah poin setelah menghitung
+                tampilkanIklan();
+            } catch (e) {
+                document.getElementById("hasil").innerText = "Error: " + e.message;
+            }
+        }
+
+        function ubahKeDesimal(angka) {
+            if (angka.includes("/")) {
+                let [pembilang, penyebut] = angka.split("/").map(Number);
+                return pembilang / penyebut;
+            }
+            return parseFloat(angka);
+        }
+
+        function ubahKePecahan(nilai) {
+            let toleransi = 1e-10;
+            let penyebut = 1;
+            while (Math.abs(Math.round(nilai * penyebut) - nilai * penyebut) > toleransi) {
+                penyebut++;
+            }
+            let pembilang = Math.round(nilai * penyebut);
+            return `${pembilang}/${penyebut}`;
+        }
+
+        function tampilkanChangeLog() {
+            alert("📝 ChangeLog KalkulatorBYVin v1.5Beta\n\n- Perbaikan bug\n- New Hitung Volume Bangun Ruang\n- Menu Contact Dev\n- Poin\n-IQScore\n-Login Account Create\n-Upload Foto");
+        }
+
+        function tampilkanTutorial() {
+            alert("📘 Tutorial\n\n1. Masukkan ekspresi matematika di kotak input.\n2. Pilih operasi yang diinginkan.\n3. Klik tombol 'Hitung' untuk melihat hasil.\n\nUntuk persamaan linear, masukkan dalam format yang sesuai.");
+        }
+
+        function tampilkanContactDev() {
+            alert("📞 Contact Developer\n\nEmail: vinhaidigital@gmail.com\nGitHub: https://github.com/vindevcute/vindevcute");
+        }
+
+        function tampilkanMenuVolume() {
+            let pilihan = prompt(
+                "Pilih bangun ruang:\n" +
+                "1. Kubus\n" +
+                "2. Balok\n" +
+                "3. Tabung\n" +
+                "4. Kerucut\n" +
+                "5. Lingkaran\n\n" +
+                "Masukkan nomor pilihan:"
+            );
+            switch (pilihan) {
+                case "1":
+                    hitungVolumeKubus();
+                    break;
+                case "2":
+                    hitungVolumeBalok();
+                    break;
+                case "3":
+                    hitungVolumeTabung();
+                    break;
+                case "4":
+                    hitungVolumeKerucut();
+                    break;
+                case "5":
+                    hitungLuasLingkaran();
+                    break;
+                default:
+                    alert("Pilihan tidak valid.");
+            }
+        }
+
+        function tampilkanMenuGeometri() {
+       let pilihan = prompt(
+           "Pilih operasi geometri:\n" +
+           "1. Translasi\n" +
+           "2. Rotasi\n" +
+           "3. Kekongruenan Segitiga\n" +
+           "4. Dilatasi\n" +
+           "5. Refleksi\n\n" +
+           "Masukkan nomor pilihan:"
+       );
+       switch (pilihan) {
+           case "1":
+               hitungTranslasi();
+               break;
+           case "2":
+               hitungRotasi();
+               break;
+           case "3":
+               hitungKekongruenanSegitiga();
+               break;
+           case "4":
+               hitungDilatasi();
+               break;
+           case "5":
+               hitungRefleksi();
+               break;
+           default:
+               alert("Pilihan tidak valid.");
+       }
+   }
+
+        function hitungVolumeKubus() {
+            let sisi = parseFloat(prompt(
+                "Masukkan panjang sisi kubus.\n" +
+                "Rumus: V = s³\n" +
+                "Contoh: Jika sisi = 5, masukkan 5"
+            ));
+            if (isNaN(sisi) || sisi <= 0) {
+                alert("Input tidak valid. Masukkan angka positif.");
+                return;
+            }
+            let volume = Math.pow(sisi, 3);
+            document.getElementById("hasil").innerText = "Volume Kubus: " + volume.toFixed(2);
+        }
+
+        function hitungVolumeBalok() {
+            let panjang = parseFloat(prompt(
+                "Masukkan panjang balok.\n" +
+                "Rumus: V = p × l × t\n" +
+                "Contoh: Jika panjang = 4, lebar = 3, tinggi = 2, masukkan 4"
+            ));
+            let lebar = parseFloat(prompt("Masukkan lebar balok:"));
+            let tinggi = parseFloat(prompt("Masukkan tinggi balok:"));
+            if (isNaN(panjang) || isNaN(lebar) || isNaN(tinggi) || panjang <= 0 || lebar <= 0 || tinggi <= 0) {
+                alert("Input tidak valid. Masukkan angka positif.");
+                return;
+            }
+            let volume = panjang * lebar * tinggi;
+            document.getElementById("hasil").innerText = "Volume Balok: " + volume.toFixed(2);
+        }
+
+        function hitungVolumeTabung() {
+            let jariJari = parseFloat(prompt(
+                "Masukkan jari-jari tabung.\n" +
+                "Rumus: V = π × r² × t\n" +
+                "Contoh: Jika jari-jari = 3, tinggi = 5, masukkan 3"
+            ));
+            let tinggi = parseFloat(prompt("Masukkan tinggi tabung:"));
+            if (isNaN(jariJari) || isNaN(tinggi) || jariJari <= 0 || tinggi <= 0) {
+                alert("Input tidak valid. Masukkan angka positif.");
+                return;
+            }
+            let volume = Math.PI * Math.pow(jariJari, 2) * tinggi;
+            document.getElementById("hasil").innerText = "Volume Tabung: " + volume.toFixed(2);
+        }
+
+        function hitungVolumeKerucut() {
+            let jariJari = parseFloat(prompt(
+                "Masukkan jari-jari kerucut.\n" +
+                "Rumus: V = ⅓ × π × r² × t\n" +
+                "Contoh: Jika jari-jari = 4, tinggi = 6, masukkan 4"
+            ));
+            let tinggi = parseFloat(prompt("Masukkan tinggi kerucut:"));
+            if (isNaN(jariJari) || isNaN(tinggi) || jariJari <= 0 || tinggi <= 0) {
+                alert("Input tidak valid. Masukkan angka positif.");
+                return;
+            }
+            let volume = (1 / 3) * Math.PI * Math.pow(jariJari, 2) * tinggi;
+            document.getElementById("hasil").innerText = "Volume Kerucut: " + volume.toFixed(2);
+        }
+
+        function hitungLuasLingkaran() {
+            let jariJari = parseFloat(prompt(
+                "Masukkan jari-jari lingkaran.\n" +
+                "Rumus: L = π × r²\n" +
+                "Contoh: Jika jari-jari = 7, masukkan 7"
+            ));
+            if (isNaN(jariJari) || jariJari <= 0) {
+                alert("Input tidak valid. Masukkan angka positif.");
+                return;
+            }
+            let luas = Math.PI * Math.pow(jariJari, 2);
+            document.getElementById("hasil").innerText = "Luas Lingkaran: " + luas.toFixed(2);
+        }
+
+        function hitungTranslasi() {
+            let x = parseFloat(prompt("Masukkan koordinat x:"));
+            let y = parseFloat(prompt("Masukkan koordinat y:"));
+            let tx = parseFloat(prompt("Masukkan translasi x:"));
+            let ty = parseFloat(prompt("Masukkan translasi y:"));
+            if (isNaN(x) || isNaN(y) || isNaN(tx) || isNaN(ty)) {
+                alert("Input tidak valid. Masukkan angka.");
+                return;
+            }
+            let newX = x + tx;
+            let newY = y + ty;
+            document.getElementById("hasil").innerText = `Koordinat setelah translasi: (${newX}, ${newY})`;
+        }
+
+        function hitungRotasi() {
+            let x = parseFloat(prompt("Masukkan koordinat x:"));
+            let y = parseFloat(prompt("Masukkan koordinat y:"));
+            let sudut = parseFloat(prompt("Masukkan sudut rotasi (derajat):"));
+            if (isNaN(x) || isNaN(y) || isNaN(sudut)) {
+                alert("Input tidak valid. Masukkan angka.");
+                return;
+            }
+            let radian = (sudut * Math.PI) / 180;
+            let newX = x * Math.cos(radian) - y * Math.sin(radian);
+            let newY = x * Math.sin(radian) + y * Math.cos(radian);
+            document.getElementById("hasil").innerText = `Koordinat setelah rotasi: (${newX.toFixed(2)}, ${newY.toFixed(2)})`;
+        }
+
+        function hitungKekongruenanSegitiga() {
+            let sisi1A = parseFloat(prompt("Masukkan panjang sisi 1 segitiga A:"));
+            let sisi2A = parseFloat(prompt("Masukkan panjang sisi 2 segitiga A:"));
+            let sisi3A = parseFloat(prompt("Masukkan panjang sisi 3 segitiga A:"));
+            let sisi1B = parseFloat(prompt("Masukkan panjang sisi 1 segitiga B:"));
+            let sisi2B = parseFloat(prompt("Masukkan panjang sisi 2 segitiga B:"));
+            let sisi3B = parseFloat(prompt("Masukkan panjang sisi 3 segitiga B:"));
+            if (isNaN(sisi1A) || isNaN(sisi2A) || isNaN(sisi3A) || isNaN(sisi1B) || isNaN(sisi2B) || isNaN(sisi3B)) {
+                alert("Input tidak valid. Masukkan angka.");
+                return;
+            }
+            let segitigaA = [sisi1A, sisi2A, sisi3A].sort((a, b) => a - b);
+            let segitigaB = [sisi1B, sisi2B, sisi3B].sort((a, b) => a - b);
+            if (segitigaA[0] === segitigaB[0] && segitigaA[1] === segitigaB[1] && segitigaA[2] === segitigaB[2]) {
+                document.getElementById("hasil").innerText = "Segitiga A dan B kongruen.";
+            } else {
+                document.getElementById("hasil").innerText = "Segitiga A dan B tidak kongruen.";
+            }
+        }
+        
+        function hitungRefleksi() {
+       let x = parseFloat(prompt("Masukkan koordinat x:"));
+       let y = parseFloat(prompt("Masukkan koordinat y:"));
+       if (isNaN(x) || isNaN(y)) {
+           alert("Input tidak valid. Masukkan angka.");
+           return;
+       }
+
+       let sumbu = prompt(
+           "Pilih sumbu refleksi:\n" +
+           "1. Sumbu X\n" +
+           "2. Sumbu Y\n" +
+           "3. Garis y = x\n\n" +
+           "Masukkan nomor pilihan:"
+       );
+
+       let newX, newY;
+       switch (sumbu) {
+           case "1": // Refleksi terhadap sumbu X
+               newX = x;
+               newY = -y;
+               break;
+           case "2": // Refleksi terhadap sumbu Y
+               newX = -x;
+               newY = y;
+               break;
+           case "3": // Refleksi terhadap garis y = x
+               newX = y;
+               newY = x;
+               break;
+           default:
+               alert("Pilihan tidak valid.");
+               return;
+       }
+
+       document.getElementById("hasil").innerText = `Koordinat setelah refleksi: (${newX}, ${newY})`;
+       }
+
+        function hitungDilatasi() {
+            let x = parseFloat(prompt("Masukkan koordinat x:"));
+            let y = parseFloat(prompt("Masukkan koordinat y:"));
+            let skala = parseFloat(prompt("Masukkan faktor skala:"));
+            if (isNaN(x) || isNaN(y) || isNaN(skala)) {
+                alert("Input tidak valid. Masukkan angka.");
+                return;
+            }
+            let newX = x * skala;
+            let newY = y * skala;
+            document.getElementById("hasil").innerText = `Koordinat setelah dilatasi: (${newX}, ${newY})`;
+        }
+
+        function tambahPoin(jumlah) {
+            poin += jumlah;
+            localStorage.setItem('poin', poin);
+            document.getElementById('poin').innerText = poin;
+        }
+
+        function tambahIQ(jumlah) {
+            iq += jumlah;
+            localStorage.setItem('iq', iq);
+            document.getElementById('iq').innerText = iq;
+        }
+
+        function beliIQ(jumlah) {
+            let biaya = jumlah * 10;
+            if (poin >= biaya) {
+                poin -= biaya;
+                tambahIQ(jumlah);
+                alert(`Anda berhasil membeli ${jumlah} IQ. Poin Anda sekarang: ${poin}`);
+            } else {
+                alert("Poin Anda tidak cukup.");
+            }
+        }
+
+        function tampilkanIklan() {
+            document.getElementById('ad').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('ad').style.display = 'none';
+            }, 5000); // Iklan akan hilang setelah 5 detik
+        }
+
+        function prosesSoalDariFoto() {
+            let fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                alert("Silakan pilih file gambar terlebih dahulu.");
+                return;
+            }
+
+            let file = fileInput.files[0];
+            let reader = new FileReader();
+
+            // Tampilkan pesan loading
+            document.getElementById('loading').style.display = 'block';
+
+            reader.onload = function(e) {
+                // Gunakan Tesseract.js untuk mengenali teks dari gambar
+                Tesseract.recognize(
+                    e.target.result, // Gambar yang diunggah
+                    'eng',          // Bahasa yang digunakan (English)
+                    {
+                        logger: m => console.log(m) // Log proses OCR
+                    }
+                ).then(({ data: { text } }) => {
+                    // Jika teks berhasil diekstrak, masukkan ke input
+                    document.getElementById("input").value = text;
+                    document.getElementById('loading').style.display = 'none'; // Sembunyikan pesan loading
+                    alert("Teks berhasil diekstrak: " + text);
+                }).catch(err => {
+                    // Jika terjadi error, tampilkan pesan error
+                    document.getElementById('loading').style.display = 'none'; // Sembunyikan pesan loading
+                    alert("Gagal memproses gambar: " + err.message);
+                });
+            };
+
+            // Mulai membaca file gambar
+            reader.readAsDataURL(file);
+        }
+
+        function buatAkun() {
+            let username = document.getElementById('username').value;
+            let password = document.getElementById('password').value;
+
+            if (users[username]) {
+                alert("Username sudah digunakan.");
+                return;
+            }
+
+            users[username] = { password, poin: 100, iq: 100 };
+            localStorage.setItem('users', JSON.stringify(users));
+            alert("Akun berhasil dibuat!");
+        }
+
+        function login() {
+            let username = document.getElementById('username').value;
+            let password = document.getElementById('password').value;
+
+            if (!users[username] || users[username].password !== password) {
+                alert("Username atau password salah.");
+                return;
+            }
+
+            poin = users[username].poin;
+            iq = users[username].iq;
+            document.getElementById('poin').innerText = poin;
+            document.getElementById('iq').innerText = iq;
+
+            // Cek login streak
+            let today = new Date().toDateString();
+            if (lastLogin !== today) {
+                loginStreak++;
+                localStorage.setItem('loginStreak', loginStreak);
+                localStorage.setItem('lastLogin', today);
+
+                if (loginStreak === 1) {
+                    tambahPoin(10);
+                    alert("Selamat! Anda mendapatkan +10 Poin untuk login hari ini.");
+                } else if (loginStreak === 3) {
+                    tambahIQ(5);
+                    alert("Selamat! Anda mendapatkan +5 IQ untuk login 3 hari berturut-turut.");
+                }
+            }
+
+            // Cek penggunaan lebih dari 1 menit
+            let endTime = Date.now();
+            let usageTime = (endTime - startTime) / 1000; // Dalam detik
+            if (usageTime > 60) {
+                tambahPoin(5);
+                alert("Selamat! Anda mendapatkan +5 Poin karena menggunakan aplikasi lebih dari 1 menit.");
+            }
+
+            alert("Login berhasil!");
+        }
+
+        window.onload = function() {
+            // Cek apakah pengguna sudah login hari ini
+            let today = new Date().toDateString();
+            if (lastLogin !== today) {
+                loginStreak = 0; // Reset streak jika tidak login berturut-turut
+                localStorage.setItem('loginStreak', loginStreak);
+            }
+        };
+    </script>
+
+</body>
+</html>
