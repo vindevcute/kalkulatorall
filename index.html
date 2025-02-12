@@ -47,12 +47,12 @@
             margin-top: 10px;
             color: #007bff;
         }
-        .menu-holder {
+        .menu {
             position: absolute;
             top: 10px;
             right: 10px;
         }
-        .menu-holder button {
+        .menu button {
             background: none;
             border: none;
             font-size: 20px;
@@ -108,6 +108,7 @@
             font-size: 18px;
             color: #007bff;
         }
+        /* Tambahan CSS untuk logo email */
         .email-logo {
             position: fixed;
             bottom: 20px;
@@ -121,18 +122,19 @@
             color: #0056b3;
         }
     </style>
+    <!-- Tesseract.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
+    <!-- Font Awesome untuk ikon email -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
     <!-- Logo Email di pojok kiri bawah -->
     <a href="mailto:vinhaidigital@gmail.com" class="email-logo">
-        <i class="fas fa-envelope"></i>
+        <i class="fas fa-envelope"></i> <!-- Ikon email dari Font Awesome -->
     </a>
 
-    <!-- Menu Holder -->
-    <div class="menu-holder" id="menuHolder">
+    <div class="menu">
         <button onclick="toggleMenu()">|||</button>
         <div id="dropdown" class="dropdown">
             <a href="#" onclick="tampilkanChangeLog()">📝 ChangeLog</a>
@@ -141,7 +143,6 @@
             <a href="#" onclick="tampilkanContactDev()">📞 Contact Dev</a>
             <a href="#" onclick="tampilkanMenuVolume()">📏 Hitung Volume</a>
             <a href="#" onclick="tampilkanMenuGeometri()">📐 Geometri</a>
-            <a href="#" onclick="hitungRefleksi()">🪞 Refleksi</a>
         </div>
     </div>
 
@@ -194,6 +195,7 @@
         </div>
 
         <div class="ad" id="ad">
+            <!-- Tempat untuk iklan -->
             <p>Thank you for using the services here</p>
         </div>
 
@@ -206,43 +208,309 @@
         </div>
     </div>
 
-    <!-- Watermark -->
-    <div style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); color: #007bff; font-size: 14px;">
-        Copyright by VinDev
-    </div>
-
     <script>
-        // ... (kode JavaScript yang sudah ada sebelumnya)
+        let poin = localStorage.getItem('poin') ? parseInt(localStorage.getItem('poin')) : 100;
+        let iq = localStorage.getItem('iq') ? parseInt(localStorage.getItem('iq')) : 100;
+        let users = JSON.parse(localStorage.getItem('users')) || {};
+        let lastLogin = localStorage.getItem('lastLogin') || "";
+        let loginStreak = localStorage.getItem('loginStreak') ? parseInt(localStorage.getItem('loginStreak')) : 0;
+        let startTime = Date.now(); // Waktu mulai penggunaan aplikasi
 
-        function hitungRefleksi() {
-            let x = parseFloat(prompt("Masukkan koordinat x:"));
-            let y = parseFloat(prompt("Masukkan koordinat y:"));
-            let sumbu = prompt("Masukkan sumbu refleksi (x atau y):");
-
-            if (isNaN(x) || isNaN(y) || (sumbu !== 'x' && sumbu !== 'y')) {
-                alert("Input tidak valid. Masukkan angka dan sumbu yang benar (x atau y).");
-                return;
-            }
-
-            let newX, newY;
-            if (sumbu === 'x') {
-                newX = x;
-                newY = -y;
-            } else if (sumbu === 'y') {
-                newX = -x;
-                newY = y;
-            }
-
-            document.getElementById("hasil").innerText = `Koordinat setelah refleksi: (${newX}, ${newY})`;
-        }
+        document.getElementById('poin').innerText = poin;
+        document.getElementById('iq').innerText = iq;
 
         function toggleMenu() {
             let menu = document.getElementById("dropdown");
             menu.style.display = menu.style.display === "block" ? "none" : "block";
         }
 
-        // ... (kode JavaScript yang sudah ada sebelumnya)
-    </script>
+        function hitungBiasa(operator) {
+            let ekspresi = document.getElementById("input").value;
+            try {
+                let angka = ekspresi.split(operator).map(Number);
+                if (angka.length < 2) throw new Error("Masukkan ekspresi yang valid");
 
-</body>
-</html>
+                let hasil;
+                switch (operator) {
+                    case "+": hasil = angka[0] + angka[1]; break;
+                    case "-": hasil = angka[0] - angka[1]; break;
+                    case "*": hasil = angka[0] * angka[1]; break;
+                    case "/": hasil = angka[0] / angka[1]; break;
+                }
+
+                document.getElementById("hasil").innerText = "Hasil: " + hasil;
+                tambahPoin(10); // Tambah poin setelah menghitung
+                tampilkanIklan();
+            } catch (e) {
+                document.getElementById("hasil").innerText = "Error: " + e.message;
+            }
+        }
+
+        function hitungPecahan(operator) {
+            let ekspresi = document.getElementById("input").value;
+            try {
+                ekspresi = ekspresi.replace(/\s+/g, '');
+                let pecahanRegex = /(\d+\/\d+|\d+)/g;
+                let angka = ekspresi.match(pecahanRegex) || [];
+
+                if (angka.length < 2) throw new Error("Masukkan ekspresi yang valid");
+
+                let hasil = ubahKeDesimal(angka[0]);
+
+                for (let i = 1; i < angka.length; i++) {
+                    let nilai = ubahKeDesimal(angka[i]);
+                    switch (operator) {
+                        case "+": hasil += nilai; break;
+                        case "-": hasil -= nilai; break;
+                        case "*": hasil *= nilai; break;
+                        case "/": hasil /= nilai; break;
+                    }
+                }
+
+                document.getElementById("hasil").innerText = "Hasil: " + ubahKePecahan(hasil);
+                tambahPoin(10); // Tambah poin setelah menghitung
+                tampilkanIklan();
+            } catch (e) {
+                document.getElementById("hasil").innerText = "Error: " + e.message;
+            }
+        }
+
+        function ubahKeDesimal(angka) {
+            if (angka.includes("/")) {
+                let [pembilang, penyebut] = angka.split("/").map(Number);
+                return pembilang / penyebut;
+            }
+            return parseFloat(angka);
+        }
+
+        function ubahKePecahan(nilai) {
+            let toleransi = 1e-10;
+            let penyebut = 1;
+            while (Math.abs(Math.round(nilai * penyebut) - nilai * penyebut) > toleransi) {
+                penyebut++;
+            }
+            let pembilang = Math.round(nilai * penyebut);
+            return `${pembilang}/${penyebut}`;
+        }
+
+        function tampilkanChangeLog() {
+            alert("📝 ChangeLog KalkulatorBYVin v1.5Beta\n\n- Perbaikan bug\n- New Hitung Volume Bangun Ruang\n- Menu Contact Dev\n- Poin\n-IQScore\n-Login Account Create\n-Upload Foto");
+        }
+
+        function tampilkanTutorial() {
+            alert("📘 Tutorial\n\n1. Masukkan ekspresi matematika di kotak input.\n2. Pilih operasi yang diinginkan.\n3. Klik tombol 'Hitung' untuk melihat hasil.\n\nUntuk persamaan linear, masukkan dalam format yang sesuai.");
+        }
+
+        function tampilkanContactDev() {
+            alert("📞 Contact Developer\n\nEmail: vinhaidigital@gmail.com\nGitHub: https://github.com/vindevcute/vindevcute");
+        }
+
+        function tampilkanMenuVolume() {
+            let pilihan = prompt(
+                "Pilih bangun ruang:\n" +
+                "1. Kubus\n" +
+                "2. Balok\n" +
+                "3. Tabung\n" +
+                "4. Kerucut\n" +
+                "5. Lingkaran\n\n" +
+                "Masukkan nomor pilihan:"
+            );
+            switch (pilihan) {
+                case "1":
+                    hitungVolumeKubus();
+                    break;
+                case "2":
+                    hitungVolumeBalok();
+                    break;
+                case "3":
+                    hitungVolumeTabung();
+                    break;
+                case "4":
+                    hitungVolumeKerucut();
+                    break;
+                case "5":
+                    hitungLuasLingkaran();
+                    break;
+                default:
+                    alert("Pilihan tidak valid.");
+            }
+        }
+
+        function tampilkanMenuGeometri() {
+            let pilihan = prompt(
+                "Pilih operasi geometri:\n" +
+                "1. Translasi\n" +
+                "2. Rotasi\n" +
+                "3. Kekongruenan Segitiga\n" +
+                "4. Dilatasi\n\n" +
+                "Masukkan nomor pilihan:"
+            );
+            switch (pilihan) {
+                case "1":
+                    hitungTranslasi();
+                    break;
+                case "2":
+                    hitungRotasi();
+                    break;
+                case "3":
+                    hitungKekongruenanSegitiga();
+                    break;
+                case "4":
+                    hitungDilatasi();
+                    break;
+                default:
+                    alert("Pilihan tidak valid.");
+            }
+        }
+
+        function hitungVolumeKubus() {
+            let sisi = parseFloat(prompt(
+                "Masukkan panjang sisi kubus.\n" +
+                "Rumus: V = s³\n" +
+                "Contoh: Jika sisi = 5, masukkan 5"
+            ));
+            if (isNaN(sisi) || sisi <= 0) {
+                alert("Input tidak valid. Masukkan angka positif.");
+                return;
+            }
+            let volume = Math.pow(sisi, 3);
+            document.getElementById("hasil").innerText = "Volume Kubus: " + volume.toFixed(2);
+        }
+
+        function hitungVolumeBalok() {
+            let panjang = parseFloat(prompt(
+                "Masukkan panjang balok.\n" +
+                "Rumus: V = p × l × t\n" +
+                "Contoh: Jika panjang = 4, lebar = 3, tinggi = 2, masukkan 4"
+            ));
+            let lebar = parseFloat(prompt("Masukkan lebar balok:"));
+            let tinggi = parseFloat(prompt("Masukkan tinggi balok:"));
+            if (isNaN(panjang) || isNaN(lebar) || isNaN(tinggi) || panjang <= 0 || lebar <= 0 || tinggi <= 0) {
+                alert("Input tidak valid. Masukkan angka positif.");
+                return;
+            }
+            let volume = panjang * lebar * tinggi;
+            document.getElementById("hasil").innerText = "Volume Balok: " + volume.toFixed(2);
+        }
+
+        function hitungVolumeTabung() {
+            let jariJari = parseFloat(prompt(
+                "Masukkan jari-jari tabung.\n" +
+                "Rumus: V = π × r² × t\n" +
+                "Contoh: Jika jari-jari = 3, tinggi = 5, masukkan 3"
+            ));
+            let tinggi = parseFloat(prompt("Masukkan tinggi tabung:"));
+            if (isNaN(jariJari) || isNaN(tinggi) || jariJari <= 0 || tinggi <= 0) {
+                alert("Input tidak valid. Masukkan angka positif.");
+                return;
+            }
+            let volume = Math.PI * Math.pow(jariJari, 2) * tinggi;
+            document.getElementById("hasil").innerText = "Volume Tabung: " + volume.toFixed(2);
+        }
+
+        function hitungVolumeKerucut() {
+            let jariJari = parseFloat(prompt(
+                "Masukkan jari-jari kerucut.\n" +
+                "Rumus: V = ⅓ × π × r² × t\n" +
+                "Contoh: Jika jari-jari = 4, tinggi = 6, masukkan 4"
+            ));
+            let tinggi = parseFloat(prompt("Masukkan tinggi kerucut:"));
+            if (isNaN(jariJari) || isNaN(tinggi) || jariJari <= 0 || tinggi <= 0) {
+                alert("Input tidak valid. Masukkan angka positif.");
+                return;
+            }
+            let volume = (1 / 3) * Math.PI * Math.pow(jariJari, 2) * tinggi;
+            document.getElementById("hasil").innerText = "Volume Kerucut: " + volume.toFixed(2);
+        }
+
+        function hitungLuasLingkaran() {
+            let jariJari = parseFloat(prompt(
+                "Masukkan jari-jari lingkaran.\n" +
+                "Rumus: L = π × r²\n" +
+                "Contoh: Jika jari-jari = 7, masukkan 7"
+            ));
+            if (isNaN(jariJari) || jariJari <= 0) {
+                alert("Input tidak valid. Masukkan angka positif.");
+                return;
+            }
+            let luas = Math.PI * Math.pow(jariJari, 2);
+            document.getElementById("hasil").innerText = "Luas Lingkaran: " + luas.toFixed(2);
+        }
+
+        function hitungTranslasi() {
+            let x = parseFloat(prompt("Masukkan koordinat x:"));
+            let y = parseFloat(prompt("Masukkan koordinat y:"));
+            let tx = parseFloat(prompt("Masukkan translasi x:"));
+            let ty = parseFloat(prompt("Masukkan translasi y:"));
+            if (isNaN(x) || isNaN(y) || isNaN(tx) || isNaN(ty)) {
+                alert("Input tidak valid. Masukkan angka.");
+                return;
+            }
+            let newX = x + tx;
+            let newY = y + ty;
+            document.getElementById("hasil").innerText = `Koordinat setelah translasi: (${newX}, ${newY})`;
+        }
+
+        function hitungRotasi() {
+            let x = parseFloat(prompt("Masukkan koordinat x:"));
+            let y = parseFloat(prompt("Masukkan koordinat y:"));
+            let sudut = parseFloat(prompt("Masukkan sudut rotasi (derajat):"));
+            if (isNaN(x) || isNaN(y) || isNaN(sudut)) {
+                alert("Input tidak valid. Masukkan angka.");
+                return;
+            }
+            let radian = (sudut * Math.PI) / 180;
+            let newX = x * Math.cos(radian) - y * Math.sin(radian);
+            let newY = x * Math.sin(radian) + y * Math.cos(radian);
+            document.getElementById("hasil").innerText = `Koordinat setelah rotasi: (${newX.toFixed(2)}, ${newY.toFixed(2)})`;
+        }
+
+        function hitungKekongruenanSegitiga() {
+            let sisi1A = parseFloat(prompt("Masukkan panjang sisi 1 segitiga A:"));
+            let sisi2A = parseFloat(prompt("Masukkan panjang sisi 2 segitiga A:"));
+            let sisi3A = parseFloat(prompt("Masukkan panjang sisi 3 segitiga A:"));
+            let sisi1B = parseFloat(prompt("Masukkan panjang sisi 1 segitiga B:"));
+            let sisi2B = parseFloat(prompt("Masukkan panjang sisi 2 segitiga B:"));
+            let sisi3B = parseFloat(prompt("Masukkan panjang sisi 3 segitiga B:"));
+            if (isNaN(sisi1A) || isNaN(sisi2A) || isNaN(sisi3A) || isNaN(sisi1B) || isNaN(sisi2B) || isNaN(sisi3B)) {
+                alert("Input tidak valid. Masukkan angka.");
+                return;
+            }
+            let segitigaA = [sisi1A, sisi2A, sisi3A].sort((a, b) => a - b);
+            let segitigaB = [sisi1B, sisi2B, sisi3B].sort((a, b) => a - b);
+            if (segitigaA[0] === segitigaB[0] && segitigaA[1] === segitigaB[1] && segitigaA[2] === segitigaB[2]) {
+                document.getElementById("hasil").innerText = "Segitiga A dan B kongruen.";
+            } else {
+                document.getElementById("hasil").innerText = "Segitiga A dan B tidak kongruen.";
+            }
+        }
+
+        function hitungDilatasi() {
+            let x = parseFloat(prompt("Masukkan koordinat x:"));
+            let y = parseFloat(prompt("Masukkan koordinat y:"));
+            let skala = parseFloat(prompt("Masukkan faktor skala:"));
+            if (isNaN(x) || isNaN(y) || isNaN(skala)) {
+                alert("Input tidak valid. Masukkan angka.");
+                return;
+            }
+            let newX = x * skala;
+            let newY = y * skala;
+            document.getElementById("hasil").innerText = `Koordinat setelah dilatasi: (${newX}, ${newY})`;
+        }
+
+        function tambahPoin(jumlah) {
+            poin += jumlah;
+            localStorage.setItem('poin', poin);
+            document.getElementById('poin').innerText = poin;
+        }
+
+        function tambahIQ(jumlah) {
+            iq += jumlah;
+            localStorage.setItem('iq', iq);
+            document.getElementById('iq').innerText = iq;
+        }
+
+        function beliIQ(jumlah) {
+            let biaya = jumlah * 10;
+            if (poin >= biaya) {
+                poin -= biay
